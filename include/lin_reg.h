@@ -26,7 +26,9 @@ public:
   double get_mse() const;
   double get_rmse() const;
 
-  template <typename T> void intiliaze_weight(vector<T> x);
+  void load_test_data(vector<vector<double>> x_test, vector<double> y_test);
+
+  template <typename T> void initialize_weight(const vector<T> &x);
 
   // Optional: for evaluating on new data
   double score(const std::vector<double> &x_test,
