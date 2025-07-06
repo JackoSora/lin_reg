@@ -1,12 +1,12 @@
 # Minimalist CMake file for C++20 with Ninja
 
 cmake_minimum_required(VERSION 3.16)
-project(lin_reg LANGUAGES CXX)
+project(lin_reg LANGUAGES CXX VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
+set(EXPORT_COMPILE_COMMANDS ON)
 include_directories(include)
 
 set(SOURCES

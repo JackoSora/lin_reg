@@ -27,12 +27,29 @@ void LinearRegression::initialize_weight(const vector<T> &x) {
   }
 };
 
+/**
+    @param x_test n x m matrix where n = training_data_size and m = number of
+   feature per data entry
+    @param y_test corresponding labels to the datasets
+
+ */
 void LinearRegression::load_test_data(vector<vector<double>> x_test,
                                       vector<double> y_test) {
   if (x_test.size() != y_test.size()) {
     throw std::invalid_argument("label size doesn't match entry size");
+  } else if (x_test.empty() || y_test.empty()) {
+    throw std::invalid_argument("empty dataset");
+  } 
+  for (const auto &row : x_test) {
+    if (row.size() != x_test[0].size()){
+      throw std::invalid_argument("inconsistent feature size in dataset");
+    }
   }
-
+  this->initialize_weight(x_test[0]); 
+  this->m_w.clear();
+  this->m_w.resize(x_test[0].size());
+  this->m_y.clear();
+  this->m_y.resize(y_test.size());
   this->m_x = x_test;
   this->m_y = y_test;
 };
