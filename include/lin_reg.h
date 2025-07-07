@@ -14,7 +14,7 @@ private:
 
 public:
   LinearRegression(double lr = 0.01, unsigned int epochs = 1000);
-  void checkInvariants();
+  void checkInvariants() const;
 
   void fit(const vector<vector<double>> x,
            const vector<double>
@@ -24,6 +24,7 @@ public:
   double get_w() const;
   double get_b() const;
   double get_mse() const;
+  double mse() const;
 
   void load_test_data(vector<vector<double>> x_test, vector<double> y_test);
 

@@ -1,8 +1,8 @@
 #include "lin_reg.h"
 #include <cassert>
+#include <cmath>
 #include <random>
 #include <stdexcept>
-
 using namespace std;
 
 LinearRegression::LinearRegression(double lr, unsigned int epochs) {
@@ -15,7 +15,7 @@ LinearRegression::LinearRegression(double lr, unsigned int epochs) {
   this->m_bias = 0.0;
 }
 
-void LinearRegression::checkInvariants() {
+void LinearRegression::checkInvariants() const {
   // Data consistency: if we have training data, X and Y must have same number
   // of samples
   if (!m_x.empty() && !m_y.empty()) {
@@ -97,6 +97,21 @@ void LinearRegression::load_test_data(vector<vector<double>> x_test,
   this->m_y = y_test;
   checkInvariants();
 };
+
+double LinearRegression::mse() const {
+  this->checkInvariants();
+
+  if (m_y.size() != m_y_hat.size() || m_y.empty()) {
+    throw std::invalid_argument("label or prediction data is corrupted");
+  }
+
+  double mse = 0;
+  for (size_t i = 0; i < m_y.size(); i++) {
+    mse += pow((m_y[i] - m_y_hat[i]), 2);
+  }
+  mse = mse / static_cast<double>(m_y.size());
+  return mse;
+}
 
 /**
   @param x being the feature vector we want to predict
