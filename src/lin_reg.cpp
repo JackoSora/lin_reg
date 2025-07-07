@@ -39,20 +39,40 @@ void LinearRegression::load_test_data(vector<vector<double>> x_test,
     throw std::invalid_argument("label size doesn't match entry size");
   } else if (x_test.empty() || y_test.empty()) {
     throw std::invalid_argument("empty dataset");
-  } 
+  }
   for (const auto &row : x_test) {
-    if (row.size() != x_test[0].size()){
+    if (row.size() != x_test[0].size()) {
       throw std::invalid_argument("inconsistent feature size in dataset");
     }
   }
-  this->initialize_weight(x_test[0]); 
+  // --- Initialize weights based on the first row of x_test - part before is
+  // just error handlign
+  this->initialize_weight(x_test[0]);
+
   this->m_w.clear();
   this->m_w.resize(x_test[0].size());
+
   this->m_y.clear();
   this->m_y.resize(y_test.size());
+
   this->m_x = x_test;
   this->m_y = y_test;
 };
+
+/**
+  @param x being the feature vector we want to predict
+ */
+double LinearRegression::predict(vector<double> x) const {
+  if (x.size() != m_w.size()) {
+    throw std::invalid_argument("Feature vec not same size as weight vector");
+  }
+
+  double prediction = m_bias;
+  for (size_t i = 0; i < m_w.size(); i++) {
+    prediction += x[i] + m_w[i];
+  }
+  return prediction;
+}
 
 template void LinearRegression::initialize_weight(const vector<double> &);
 template void LinearRegression::initialize_weight(const vector<float> &);
