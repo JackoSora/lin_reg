@@ -1,16 +1,54 @@
 #include "lin_reg.h"
+#include <cassert>
 #include <random>
 #include <stdexcept>
 
 using namespace std;
 
-LinearRegression::LinearRegression(double lr, int epochs) {
+LinearRegression::LinearRegression(double lr, unsigned int epochs) {
   this->m_lr = lr;
   this->m_epochs = epochs;
   this->m_x = vector<vector<double>>();
   this->m_y = vector<double>();
+  this->m_y_hat = vector<double>();
   this->m_w = vector<double>();
   this->m_bias = 0.0;
+}
+
+void LinearRegression::checkInvariants() {
+  // Data consistency: if we have training data, X and Y must have same number
+  // of samples
+  if (!m_x.empty() && !m_y.empty()) {
+    assert(m_x.size() == m_y.size() &&
+           "X and Y must have same number of samples");
+  }
+
+  // If we have predictions, they must match the number of training samples
+  if (!m_y_hat.empty()) {
+    assert(m_y_hat.size() == m_y.size() &&
+           "Predictions must match number of training samples");
+  }
+
+  // If we have training data, all feature vectors must have same dimensionality
+  if (!m_x.empty()) {
+    size_t feature_dim = m_x[0].size();
+    for (const auto &row : m_x) {
+      assert(row.size() == feature_dim &&
+             "All feature vectors must have same dimensionality");
+    }
+  }
+
+  // If we have weights, they must match the feature dimensionality
+  if (!m_w.empty() && !m_x.empty()) {
+    assert(m_w.size() == m_x[0].size() &&
+           "Weight vector must match feature dimensionality");
+  }
+
+  // Learning rate must be positive
+  assert(m_lr > 0.0 && "Learning rate must be positive");
+
+  // Epochs must be positive
+  assert(m_epochs > 0 && "Number of epochs must be positive");
 }
 
 template <typename T>
@@ -57,6 +95,7 @@ void LinearRegression::load_test_data(vector<vector<double>> x_test,
 
   this->m_x = x_test;
   this->m_y = y_test;
+  checkInvariants();
 };
 
 /**
@@ -69,7 +108,7 @@ double LinearRegression::predict(vector<double> x) const {
 
   double prediction = m_bias;
   for (size_t i = 0; i < m_w.size(); i++) {
-    prediction += x[i] + m_w[i];
+    prediction += x[i] * m_w[i];
   }
   return prediction;
 }
