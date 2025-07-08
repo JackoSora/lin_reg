@@ -1,17 +1,18 @@
 #include "lin_reg.h"
 #include <cassert>
 #include <cmath>
+#include <iostream>
 #include <random>
 #include <stdexcept>
-using namespace std;
+#include <__ostream/basic_ostream.h>
 
 LinearRegression::LinearRegression(double lr, unsigned int epochs) {
   this->m_lr = lr;
   this->m_epochs = epochs;
-  this->m_x = vector<vector<double>>();
-  this->m_y = vector<double>();
-  this->m_y_hat = vector<double>();
-  this->m_w = vector<double>();
+  this->m_x = std::vector<std::vector<double>>();
+  this->m_y = std::vector<double>();
+  this->m_y_hat = std::vector<double>();
+  this->m_w = std::vector<double>();
   this->m_bias = 0.0;
 }
 
@@ -52,7 +53,7 @@ void LinearRegression::checkInvariants() const {
 }
 
 template <typename T>
-void LinearRegression::initialize_weight(const vector<T> &x) {
+void LinearRegression::initialize_weight(const std::vector<T> &x) {
   m_w.clear();
   m_w.resize(x.size());
   std::random_device rd;
@@ -71,8 +72,8 @@ void LinearRegression::initialize_weight(const vector<T> &x) {
     @param y_test corresponding labels to the datasets
 
  */
-void LinearRegression::load_test_data(vector<vector<double>> x_test,
-                                      vector<double> y_test) {
+void LinearRegression::load_test_data(std::vector<std::vector<double>> x_test,
+                                      std::vector<double> y_test) {
   if (x_test.size() != y_test.size()) {
     throw std::invalid_argument("label size doesn't match entry size");
   } else if (x_test.empty() || y_test.empty()) {
@@ -87,36 +88,17 @@ void LinearRegression::load_test_data(vector<vector<double>> x_test,
   // just error handlign
   this->initialize_weight(x_test[0]);
 
-  this->m_w.clear();
-  this->m_w.resize(x_test[0].size());
-
-  this->m_y.clear();
-  this->m_y.resize(y_test.size());
-
   this->m_x = x_test;
   this->m_y = y_test;
   checkInvariants();
 };
 
-double LinearRegression::mse() const {
-  this->checkInvariants();
 
-  if (m_y.size() != m_y_hat.size() || m_y.empty()) {
-    throw std::invalid_argument("label or prediction data is corrupted");
-  }
-
-  double mse = 0;
-  for (size_t i = 0; i < m_y.size(); i++) {
-    mse += pow((m_y[i] - m_y_hat[i]), 2);
-  }
-  mse = mse / static_cast<double>(m_y.size());
-  return mse;
-}
 
 /**
   @param x being the feature vector we want to predict
  */
-double LinearRegression::predict(vector<double> x) const {
+double LinearRegression::predict(std::vector<double> x) const {
   if (x.size() != m_w.size()) {
     throw std::invalid_argument("Feature vec not same size as weight vector");
   }
@@ -128,6 +110,61 @@ double LinearRegression::predict(vector<double> x) const {
   return prediction;
 }
 
-template void LinearRegression::initialize_weight(const vector<double> &);
-template void LinearRegression::initialize_weight(const vector<float> &);
-template void LinearRegression::initialize_weight(const vector<int> &);
+double LinearRegression::mse() const {
+  this->checkInvariants();
+
+  if (m_y.size() != m_y_hat.size() || m_y.empty()) {
+    throw std::invalid_argument("label or prediction data is corrupted");
+  }
+
+  double mse = 0;
+  for (size_t i = 0; i < m_y.size(); i++) {
+    mse += std::pow((m_y[i] - m_y_hat[i]), 2);
+  }
+  mse = mse / static_cast<double>(m_y.size());
+  return mse;
+}
+
+void LinearRegression::fit(std::vector<std::vector<double>> x_test, std::vector<double> y_test){
+  this->load_test_data(std::move(x_test), std::move(y_test));
+ m_y_hat.resize(m_y.size());
+  for (unsigned int epoch = 0; epoch < m_epochs; epoch++){
+    for (size_t i = 0; i < m_x.size(); i++)
+    {
+      m_y_hat[i] = predict(m_x[i]);
+    }
+
+    std::vector<double> dw(m_x[0].size(), 0.0);
+    double db = 0.0;
+
+    for (size_t i = 0; i < m_y.size(); i++)
+    {
+      double error = m_y_hat[i] - m_y[i];
+      db += error;
+      for (size_t j = 0; j < m_w.size(); j++)
+      {
+        dw[j] += error * m_x[i][j];
+
+      }
+    }
+    db /= static_cast<double>(m_y.size());
+    for (double & j : dw) {
+      j /= static_cast<double>(m_y.size());
+    }
+
+    m_bias -= m_lr * db;
+    for (size_t j = 0; j < m_w.size(); j++) {
+      m_w[j] -= m_lr * dw[j];
+    }
+
+    if (epoch % 100 == 0) {
+      double current_mse = mse();
+      std::cout << "MSE: " << current_mse << " At epoch:" << epoch << std::endl;
+    }
+  }
+
+}
+
+template void LinearRegression::initialize_weight(const std::vector<double> &);
+template void LinearRegression::initialize_weight(const std::vector<float> &);
+template void LinearRegression::initialize_weight(const std::vector<int> &);

@@ -13,18 +13,20 @@ private:
   unsigned int m_epochs; // Number of iterations
 
 public:
-  LinearRegression(double lr = 0.01, unsigned int epochs = 1000);
+  explicit LinearRegression(double lr = 0.01, unsigned int epochs = 1000);
   void checkInvariants() const;
+  [[nodiscard]] unsigned int getEpochs() const
+  {
+      return m_epochs;
+  };
 
-  void fit(const vector<vector<double>> x,
-           const vector<double>
-               y); // fit the model to the feature vectors with labels
-  double predict(vector<double> x) const; // Predict output for a feature vector
 
-  double get_w() const;
-  double get_b() const;
-  double get_mse() const;
-  double mse() const;
+  void fit(vector<vector<double>> x,
+           vector<double>
+           y); // fit the model to the feature vectors with labels
+  [[nodiscard]]double predict(vector<double> x) const; // Predict output for a feature vector
+
+  [[nodiscard]] double mse() const;
 
   void load_test_data(vector<vector<double>> x_test, vector<double> y_test);
 
